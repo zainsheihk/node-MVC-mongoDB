@@ -6,36 +6,20 @@ const cors = require("cors");
 
 const { logger } = require("./middleware/logEvents.js");
 const { errorHandler } = require("./middleware/errorHandler.js");
+const { corsOptions } = require("./config/corsOptions.js");
 
-var whitelist = ["https://www.google.com.pk"];
-
-const corsOptions = {
-  origin: function (origin, callback) {
-    if (whitelist.indexOf(origin) !== -1 || !origin) {
-      callback(null, true);
-    } else {
-      callback(new Error("Not allowed by CORS"));
-    }
-  },
-  optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
-};
 app.use(logger);
 app.use(cors(corsOptions));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
 app.use(express.static(path.join(__dirname, "public")));
-app.use("/sub-dir", require("./routes/subdir.js"));
 app.use("/api/employees", require("./routes/api/employee.js"));
+app.use("/api/register", require("./routes/api/register.js"));
+app.use("/api/auth", require("./routes/api/auth.js"));
 
 app.get("^/$|/index(.html)?", (req, res) => {
   res.sendFile(path.join(__dirname, "views", "index.html"));
-});
-app.get("/new-page(.html)?", (req, res) => {
-  res.sendFile(path.join(__dirname, "views", "new-page.html"));
-});
-app.get("/old-page(.html)?", (req, res) => {
-  res.redirect(302, "/new-page.html");
 });
 
 app.all("*", (req, res) => {
